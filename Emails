@@ -1,0 +1,40 @@
+import os
+import re
+import pandas as pd
+
+# Step 1: Read Excel data
+excel_file = r"F:\work\2nd year\1st semester\Data structures and algorithms\Test Files.xlsx"
+Lab_email = pd.read_excel(excel_file)
+
+# Read the specific sheets into separate DataFrames
+sheet_names = ["3B", "3C"]
+sheets_data = {sheet_name: pd.read_excel(excel_file, sheet_name=sheet_name) for sheet_name in sheet_names}
+
+# Step 2: Generate email addresses for each sheet
+for sheet_name, Lab_email in sheets_data.items():
+    # Generate email addresses
+    def generate_email(name):
+        # Split student name into first name and last name
+        parts = name.split()
+        first_name = parts[0]
+        last_name = parts[-1] if len(parts) > 1 else ""
+        # Remove special characters such as ' from last name using regular expressions
+        last_name = re.sub(r'[^a-zA-Z]', '', last_name)
+        # Generate email address
+        email = f"{first_name[0]}{last_name}@gmail.com".lower()
+        return email
+
+    Lab_email["Email Address"] = Lab_email["Student Name"].apply(generate_email)
+
+    # Step 3: Print results for confirmation
+    print(f"Sheet: {sheet_name}")
+    print(Lab_email)
+
+    # Ensure the directory exists
+    # Brought up because code found file as non-existent
+    output_directory = r"F:\work\2nd year\1st semester\Data structures and algorithms"
+    os.makedirs(output_directory, exist_ok=True)
+
+    # Save the results to a new Excel file
+    output_excel_file = os.path.join(output_directory, f"Emails_{sheet_name}.xlsx")
+    Lab_email.to_excel(output_excel_file, index=False)
